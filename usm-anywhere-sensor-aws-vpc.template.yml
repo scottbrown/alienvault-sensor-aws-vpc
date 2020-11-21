@@ -189,17 +189,13 @@ Resources:
       ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
       IamInstanceProfile: !Ref USMInstanceProfile
       UserData:
-        Fn::Base64:
-          Fn::Join:
-          - ''
-          - - "{"
-            - '"nodeName"     :"'
-            - Ref: NodeName
-            - "\","
-            - '"environment"  :"prod",'
-            - '"av_profile"   :"sensor",'
-            - '"av_resources" :"wyns"'
-            - "}"
+        Fn::Base64: !Sub |
+          {
+            "nodeName"     : "${NodeName}",
+            "environment"  : "prod",
+            "av_profile"   : "sensor",
+            "av_resources" : "wyns"
+          }
       DisableApiTermination: !Ref APITermination
       Tags:
       - Key: Name
@@ -410,16 +406,8 @@ Outputs:
     Value:
       Fn::If:
       - publicIPEnabled
-      - Fn::Join:
-        - ''
-        - - http://
-          - !GetAtt USMInstance.PublicIp
-      - Fn::Join:
-        - ''
-        - - http://console.aws.amazon.com/ec2/home?region=
-          - !Ref AWS::Region
-          - "#Instances:search="
-          - !Ref USMInstance
+      - !Sub "http://${USMInstance.PublicIp}"
+      - !Sub "http://console.aws.amazon.com/ec2/home?region=${AWS::Region}#Instances:search=${USMInstance}"
     Description: >
       Visit this page to perform the initial configuration of your USM
       Anywhere Sensor.
@@ -432,4 +420,3 @@ Outputs:
   InstanceZone:
     Description: Availability Zone where the instance is deployed.
     Value: !GetAtt USMInstance.AvailabilityZone
-
