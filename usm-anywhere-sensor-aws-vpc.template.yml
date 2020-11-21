@@ -295,10 +295,7 @@ Resources:
     DependsOn: USMTrafficInterfaceSG
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
-      GroupId:
-        Fn::GetAtt:
-        - USMTrafficInterfaceSG
-        - GroupId
+      GroupId: !GetAtt USMTrafficInterfaceSG.GroupId
       IpProtocol: udp
       FromPort: '4789'
       ToPort: '4789'
@@ -308,10 +305,7 @@ Resources:
     DependsOn: USMTrafficInterfaceSG
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
-      GroupId:
-        Fn::GetAtt:
-        - USMTrafficInterfaceSG
-        - GroupId
+      GroupId: !GetAtt USMTrafficInterfaceSG.GroupId
       IpProtocol: tcp
       FromPort: '80'
       ToPort: '80'
