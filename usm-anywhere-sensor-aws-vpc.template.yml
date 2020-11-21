@@ -354,9 +354,7 @@ Resources:
     DependsOn: USMLogServicesSG
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
-      GroupId: !GetAtt:
-        - USMLogServicesSG
-        - GroupId
+      GroupId: !GetAtt USMLogServicesSG.GroupId
       IpProtocol: tcp
       FromPort: '601'
       ToPort: '602'
