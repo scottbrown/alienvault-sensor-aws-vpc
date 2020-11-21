@@ -1,12 +1,14 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: AWS CloudFormation Template for the USM Anywhere Sensor. This template
-  will create an instance of the USM Anywhere Sensor AMI with appropriate security
-  restrictions. The AMI will create a read-only instance role. You can access the
-  USM Sensor by going to the CloudFormation Template Resource tab and clicking the
-  link in the URL field that directs you to the AWS Console Instance details page.
-  Then, from the lower instance Description tab, enter the IP address of the instance
-  your browser.
+Description: >
+  AWS CloudFormation Template for the USM Anywhere Sensor. This template
+  will create an instance of the USM Anywhere Sensor AMI with appropriate
+  security restrictions. The AMI will create a read-only instance role.
+  You can access the USM Sensor by going to the CloudFormation Template
+  Resource tab and clicking the link in the URL field that directs you to
+  the AWS Console Instance details page.  Then, from the lower instance
+  Description tab, enter the IP address of the instance your browser.
+
 Conditions:
   trafficMirroringEnabled:
     Fn::Equals:
@@ -16,23 +18,28 @@ Conditions:
     Fn::Equals:
     - 'Yes'
     - Ref: PublicIP
+
 Parameters:
   SSHLocation:
-    Description: The IP address range that can be used to access the USM Anywhere
-      Sensor that you are deploying in your AWS Account through the CLI. For security
-      considerations, 0.0.0.0/0 is not recommended, so please restrict to a smaller
-      IP range if possible.
+    Description: >
+      The IP address range that can be used to access the USM Anywhere
+      Sensor that you are deploying in your AWS Account through the CLI.
+      For security considerations, 0.0.0.0/0 is not recommended, so please
+      restrict to a smaller IP range if possible.
     Type: String
     MinLength: '9'
     MaxLength: '18'
     Default: 0.0.0.0/0
     AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
-    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x.
+    ConstraintDescription: >
+      Must be a valid IP CIDR range of the form x.x.x.x/x.
   KeyName:
-    Description: Name of an existing EC2 key pair to enable SSH access to your USM
+    Description: >
+      Name of an existing EC2 key pair to enable SSH access to your USM
       Anywhere Sensor
     Type: AWS::EC2::KeyPair::KeyName
-    ConstraintDescription: Must be the name of an existing EC2 KeyPair.
+    ConstraintDescription: >
+      Must be the name of an existing EC2 KeyPair.
   APITermination:
     Description: API termination protection
     Type: String
@@ -41,41 +48,48 @@ Parameters:
     - 'false'
     - 'true'
   HTTPLocation:
-    Description: The IP address range that can be used to access the USM Anywhere
-      Sensor that you are deploying in your AWS Account through the UI. For security
-      considerations, 0.0.0.0/0 is not recommended, so please restrict to a smaller
-      IP range if possible.
+    Description: >
+      The IP address range that can be used to access the USM Anywhere
+      Sensor that you are deploying in your AWS Account through the UI.
+      For security considerations, 0.0.0.0/0 is not recommended, so please
+      restrict to a smaller IP range if possible.
     Type: String
     MinLength: '9'
     MaxLength: '18'
     Default: 0.0.0.0/0
     AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
-    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x.
+    ConstraintDescription: >
+      Must be a valid IP CIDR range of the form x.x.x.x/x.
   PublicIP:
     AllowedValues:
     - 'Yes'
     - 'No'
     Default: 'No'
-    Description: If you choose to deploy your sensor with a public IP address, the
+    Description: >
+      If you choose to deploy your sensor with a public IP address, the
       subnet you select must have 'Auto-assign public IPv4 address' enabled.
     Type: String
   VpcId:
     Type: AWS::EC2::VPC::Id
     Description: VpcId of your existing Virtual Private Cloud (VPC).
-    ConstraintDescription: Must be the VPC Id of an existing Virtual Private Cloud.
+    ConstraintDescription: >
+      Must be the VPC Id of an existing Virtual Private Cloud.
   SubnetId:
     Type: AWS::EC2::Subnet::Id
-    Description: SubnetId of an existing subnet (for the primary network) in your
+    Description: >
+      SubnetId of an existing subnet (for the primary network) in your
       Virtual Private Cloud (VPC).
-    ConstraintDescription: Must be an existing subnet in the selected Virtual Private
-      Cloud.
+    ConstraintDescription: >
+      Must be an existing subnet in the selected Virtual Private Cloud.
   TrafficMirroring:
     AllowedValues:
     - 'Yes'
     - 'No'
     Default: 'No'
-    Description: Whether or not deploy the USM Anywhere sensor ready to use traffic
-      mirroring. This option will deploy a m5.xlarge and a second network interface.
+    Description: >
+      Whether or not deploy the USM Anywhere sensor ready to use traffic
+      mirroring. This option will deploy a m5.xlarge and a second network
+      interface.
     Type: String
   NodeName:
     Description: Please provide a name for this USM Anywhere Sensor.
@@ -83,8 +97,10 @@ Parameters:
     MinLength: '1'
     MaxLength: '63'
     AllowedPattern: "^[a-zA-Z0-9](([a-zA-Z0-9\\-]*[a-zA-Z0-9]+)*)$"
-    ConstraintDescription: 'It has to be a valid hostname according to RFC 1123: It
-      can only contain numbers, letters, and dashes up to 63 characters.'
+    ConstraintDescription: >
+      It has to be a valid hostname according to RFC 1123: It can only
+      contain numbers, letters, and dashes up to 63 characters.
+
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -125,6 +141,7 @@ Metadata:
         default: Traffic Mirroring Mode
       Environment:
         default: Deployment Environment
+
 Mappings:
   RegionMap:
     us-east-1:
@@ -157,6 +174,7 @@ Mappings:
       AMI: ami-0e5b0a925f2420b96
     ca-central-1:
       AMI: ami-0d0f643bcc68c87b4
+
 Resources:
   USMInstance:
     Type: AWS::EC2::Instance
@@ -283,25 +301,28 @@ Resources:
     Properties:
       VpcId:
         Ref: VpcId
-      GroupDescription: Enable USM Log Services. Assign this Security Group to the
-        instance you want to allow Syslog UDP/TCP/TLS and Graylog connectivity to
+      GroupDescription: >
+        Enable USM Log Services. Assign this Security Group to the instance
+        you want to allow Syslog UDP/TCP/TLS and Graylog connectivity to
         your USM Sensor.
   USMEnableTrafficMirroringSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
       VpcId:
         Ref: VpcId
-      GroupDescription: Enable USM Traffic Mirroring. Assign this Security Group to
-        the instance you want to allow Traffic Mirroring connectivity to your USM
-        Sensor Traffic Network Interface.
+      GroupDescription: >
+        Enable USM Traffic Mirroring. Assign this Security Group to the
+        instance you want to allow Traffic Mirroring connectivity to your
+        USM Sensor Traffic Network Interface.
   USMTrafficInterfaceSG:
     Condition: trafficMirroringEnabled
     Type: AWS::EC2::SecurityGroup
     Properties:
       VpcId:
         Ref: VpcId
-      GroupDescription: Enable USM Traffic Mirror Connectivity on your USM Sensor
-        Traffic Network Interface.
+      GroupDescription: >
+        Enable USM Traffic Mirror Connectivity on your USM Sensor Traffic
+        Network Interface.
   SGAllowVXLanTrafficSG:
     Condition: trafficMirroringEnabled
     DependsOn: USMTrafficInterfaceSG
@@ -339,7 +360,8 @@ Resources:
     Properties:
       VpcId:
         Ref: VpcId
-      GroupDescription: Enable SSH and HTTP connectivity on your USM Sensor Instance.
+      GroupDescription: >
+        Enable SSH and HTTP connectivity on your USM Sensor Instance.
   SGIngressHTTPUSMConnectionSG:
     DependsOn: USMConnectionSG
     Type: AWS::EC2::SecurityGroupIngress
@@ -371,8 +393,9 @@ Resources:
     Properties:
       VpcId:
         Ref: VpcId
-      GroupDescription: Enable Syslog UDP/TCP/TLS and Graylog connectivity in your
-        USM Sensor Instance.
+      GroupDescription: >
+        Enable Syslog UDP/TCP/TLS and Graylog connectivity in your USM
+        Sensor Instance.
   SGIngressSyslogUSMLogServicesSG:
     DependsOn: USMLogServicesSG
     Type: AWS::EC2::SecurityGroupIngress
@@ -453,6 +476,7 @@ Resources:
       VolumeId:
         Ref: DataStorage
       Device: "/dev/sdh"
+
 Outputs:
   URL:
     Value:
@@ -470,7 +494,8 @@ Outputs:
           - Ref: AWS::Region
           - "#Instances:search="
           - Ref: USMInstance
-    Description: Visit this page to perform the initial configuration of your USM
+    Description: >
+      Visit this page to perform the initial configuration of your USM
       Anywhere Sensor.
   CLIUser:
     Description: Default Command Line Interface User.
