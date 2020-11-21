@@ -10,14 +10,8 @@ Description: >
   Description tab, enter the IP address of the instance your browser.
 
 Conditions:
-  trafficMirroringEnabled:
-    Fn::Equals:
-    - 'Yes'
-    - Ref: TrafficMirroring
-  publicIPEnabled:
-    Fn::Equals:
-    - 'Yes'
-    - Ref: PublicIP
+  trafficMirroringEnabled: !Equals ['Yes', !Ref TrafficMirroring]
+  publicIPEnabled: !Equals ['Yes', !Ref PublicIP]
 
 Parameters:
   SSHLocation:
@@ -184,31 +178,16 @@ Resources:
     - USMLogServicesSG
     Properties:
       NetworkInterfaces:
-      - AssociatePublicIpAddress:
-          Fn::If:
-          - publicIPEnabled
-          - 'true'
-          - 'false'
+      - AssociatePublicIpAddress: !If [publicIPEnabled, 'true', 'false']
         DeviceIndex: '0'
         GroupSet:
-        - Ref: USMConnectionSG
-        - Ref: USMLogServicesSG
-        SubnetId:
-          Ref: SubnetId
-      InstanceType:
-        Fn::If:
-        - trafficMirroringEnabled
-        - m5.xlarge
-        - m5.large
-      KeyName:
-        Ref: KeyName
-      ImageId:
-        Fn::FindInMap:
-        - RegionMap
-        - Ref: AWS::Region
-        - AMI
-      IamInstanceProfile:
-        Ref: USMInstanceProfile
+        - !Ref USMConnectionSG
+        - !Ref USMLogServicesSG
+        SubnetId: !Ref SubnetId
+      InstanceType: !If [trafficMirroringEnabled, m5.xlarge, m5.large]
+      KeyName: !Ref KeyName
+      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
+      IamInstanceProfile: !Ref USMInstanceProfile
       UserData:
         Fn::Base64:
           Fn::Join:
@@ -221,12 +200,10 @@ Resources:
             - '"av_profile"   :"sensor",'
             - '"av_resources" :"wyns"'
             - "}"
-      DisableApiTermination:
-        Ref: APITermination
+      DisableApiTermination: !Ref APITermination
       Tags:
       - Key: Name
-        Value:
-          Ref: AWS::StackName
+        Value: !Ref AWS::StackName
   ReadOnlyRoleWithCloudTrailManagement:
     Type: AWS::IAM::Role
     Properties:
@@ -271,16 +248,15 @@ Resources:
     Properties:
       Path: "/"
       Roles:
-      - Ref: ReadOnlyRoleWithCloudTrailManagement
+      - !Ref ReadOnlyRoleWithCloudTrailManagement
   TrafficInterface:
     Condition: trafficMirroringEnabled
     Type: AWS::EC2::NetworkInterface
     Properties:
-      SubnetId:
-        Ref: SubnetId
+      SubnetId: !Ref SubnetId
       Description: Interface for VPC Traffic Mirroring
       GroupSet:
-      - Ref: USMTrafficInterfaceSG
+      - !Ref USMTrafficInterfaceSG
       SourceDestCheck: 'true'
     DependsOn:
     - USMTrafficInterfaceSG
@@ -288,10 +264,8 @@ Resources:
     Condition: trafficMirroringEnabled
     Type: AWS::EC2::NetworkInterfaceAttachment
     Properties:
-      InstanceId:
-        Ref: USMInstance
-      NetworkInterfaceId:
-        Ref: TrafficInterface
+      InstanceId: !Ref USMInstance
+      NetworkInterfaceId: !Ref TrafficInterface
       DeviceIndex: '1'
     DependsOn:
     - TrafficInterface
@@ -299,8 +273,7 @@ Resources:
   USMEnableLogServicesSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      VpcId:
-        Ref: VpcId
+      VpcId: !Ref VpcId
       GroupDescription: >
         Enable USM Log Services. Assign this Security Group to the instance
         you want to allow Syslog UDP/TCP/TLS and Graylog connectivity to
@@ -308,8 +281,7 @@ Resources:
   USMEnableTrafficMirroringSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      VpcId:
-        Ref: VpcId
+      VpcId: !Ref VpcId
       GroupDescription: >
         Enable USM Traffic Mirroring. Assign this Security Group to the
         instance you want to allow Traffic Mirroring connectivity to your
@@ -318,8 +290,7 @@ Resources:
     Condition: trafficMirroringEnabled
     Type: AWS::EC2::SecurityGroup
     Properties:
-      VpcId:
-        Ref: VpcId
+      VpcId: !Ref VpcId
       GroupDescription: >
         Enable USM Traffic Mirror Connectivity on your USM Sensor Traffic
         Network Interface.
@@ -335,10 +306,7 @@ Resources:
       IpProtocol: udp
       FromPort: '4789'
       ToPort: '4789'
-      SourceSecurityGroupId:
-        Fn::GetAtt:
-        - USMEnableTrafficMirroringSG
-        - GroupId
+      SourceSecurityGroupId: !GetAtt USMEnableTrafficMirroringSG.GroupId
   SGAllowHTTPHealthCheckSG:
     Condition: trafficMirroringEnabled
     DependsOn: USMTrafficInterfaceSG
@@ -351,48 +319,35 @@ Resources:
       IpProtocol: tcp
       FromPort: '80'
       ToPort: '80'
-      SourceSecurityGroupId:
-        Fn::GetAtt:
-        - USMEnableTrafficMirroringSG
-        - GroupId
+      SourceSecurityGroupId: !GetAtt USMEnableTrafficMirroringSG.GroupId
   USMConnectionSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      VpcId:
-        Ref: VpcId
+      VpcId: !Ref VpcId
       GroupDescription: >
         Enable SSH and HTTP connectivity on your USM Sensor Instance.
   SGIngressHTTPUSMConnectionSG:
     DependsOn: USMConnectionSG
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
-      GroupId:
-        Fn::GetAtt:
-        - USMConnectionSG
-        - GroupId
+      GroupId: !GetAtt USMConnectionSG.GroupId
       IpProtocol: tcp
       FromPort: '80'
       ToPort: '80'
-      CidrIp:
-        Ref: HTTPLocation
+      CidrIp: !Ref HTTPLocation
   SGIngressSSHUSMConnectionSG:
     DependsOn: SGIngressHTTPUSMConnectionSG
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
-      GroupId:
-        Fn::GetAtt:
-        - USMConnectionSG
-        - GroupId
+      GroupId: GetAtt USMConnectionSG.GroupId
       IpProtocol: tcp
       FromPort: '22'
       ToPort: '22'
-      CidrIp:
-        Ref: SSHLocation
+      CidrIp: !Ref SSHLocation
   USMLogServicesSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      VpcId:
-        Ref: VpcId
+      VpcId: !Ref VpcId
       GroupDescription: >
         Enable Syslog UDP/TCP/TLS and Graylog connectivity in your USM
         Sensor Instance.
@@ -400,62 +355,40 @@ Resources:
     DependsOn: USMLogServicesSG
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
-      GroupId:
-        Fn::GetAtt:
-        - USMLogServicesSG
-        - GroupId
+      GroupId: !GetAtt USMLogServicesSG.GroupId
       IpProtocol: udp
       FromPort: '514'
       ToPort: '514'
-      SourceSecurityGroupId:
-        Fn::GetAtt:
-        - USMEnableLogServicesSG
-        - GroupId
+      SourceSecurityGroupId: !GetAtt USMEnableLogServicesSG.GroupId
   SGIngressTCPSyslogUSMLogServicesSG:
     DependsOn: USMLogServicesSG
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
-      GroupId:
-        Fn::GetAtt:
+      GroupId: !GetAtt:
         - USMLogServicesSG
         - GroupId
       IpProtocol: tcp
       FromPort: '601'
       ToPort: '602'
-      SourceSecurityGroupId:
-        Fn::GetAtt:
-        - USMEnableLogServicesSG
-        - GroupId
+      SourceSecurityGroupId: !GetAtt USMEnableLogServicesSG.GroupId
   SGIngressTLSSyslogUSMLogServicesSG:
     DependsOn: USMLogServicesSG
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
-      GroupId:
-        Fn::GetAtt:
-        - USMLogServicesSG
-        - GroupId
+      GroupId: !GetAtt USMLogServicesSG.GroupId
       IpProtocol: tcp
       FromPort: '6514'
       ToPort: '6515'
-      SourceSecurityGroupId:
-        Fn::GetAtt:
-        - USMEnableLogServicesSG
-        - GroupId
+      SourceSecurityGroupId: !GetAtt USMEnableLogServicesSG.GroupId
   SGIngressGraylogUSMLogServicesSG:
     DependsOn: USMLogServicesSG
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
-      GroupId:
-        Fn::GetAtt:
-        - USMLogServicesSG
-        - GroupId
+      GroupId: !GetAtt USMLogServicesSG.GroupId
       IpProtocol: udp
       FromPort: '12201'
       ToPort: '12201'
-      SourceSecurityGroupId:
-        Fn::GetAtt:
-        - USMEnableLogServicesSG
-        - GroupId
+      SourceSecurityGroupId: !GetAtt USMEnableLogServicesSG.GroupId
   DataStorage:
     Type: AWS::EC2::Volume
     DeletionPolicy: Delete
@@ -464,17 +397,12 @@ Resources:
       VolumeType: gp2
       Size: '100'
       Encrypted: 'true'
-      AvailabilityZone:
-        Fn::GetAtt:
-        - USMInstance
-        - AvailabilityZone
+      AvailabilityZone: !GetAtt USMInstance.AvailabilityZone
   MountPoint:
     Type: AWS::EC2::VolumeAttachment
     Properties:
-      InstanceId:
-        Ref: USMInstance
-      VolumeId:
-        Ref: DataStorage
+      InstanceId: !Ref USMInstance
+      VolumeId: !Ref DataStorage
       Device: "/dev/sdh"
 
 Outputs:
@@ -485,15 +413,13 @@ Outputs:
       - Fn::Join:
         - ''
         - - http://
-          - Fn::GetAtt:
-            - USMInstance
-            - PublicIp
+          - !GetAtt USMInstance.PublicIp
       - Fn::Join:
         - ''
         - - http://console.aws.amazon.com/ec2/home?region=
-          - Ref: AWS::Region
+          - !Ref AWS::Region
           - "#Instances:search="
-          - Ref: USMInstance
+          - !Ref USMInstance
     Description: >
       Visit this page to perform the initial configuration of your USM
       Anywhere Sensor.
@@ -502,11 +428,8 @@ Outputs:
     Value: sysadmin
   CLIUserKey:
     Description: Default Command Line Interface User SSH key.
-    Value:
-      Ref: KeyName
+    Value: !Ref KeyName
   InstanceZone:
     Description: Availability Zone where the instance is deployed.
-    Value:
-      Fn::GetAtt:
-      - USMInstance
-      - AvailabilityZone
+    Value: !GetAtt USMInstance.AvailabilityZone
+
