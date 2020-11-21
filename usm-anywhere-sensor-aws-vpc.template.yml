@@ -372,12 +372,20 @@ Outputs:
     Description: >
       Visit this page to perform the initial configuration of your USM
       Anywhere Sensor.
+    Export:
+      Name: "alienvault:endpoint:web:url"
   CLIUser:
     Description: Default Command Line Interface User.
     Value: sysadmin
+    Export:
+      Name: "alienvault:endpoint:ssh:username"
   CLIUserKey:
     Description: Default Command Line Interface User SSH key.
     Value: !Ref KeyName
+    Export:
+      Name: "alienvault:endpoint:ssh:keypair"
   InstanceZone:
     Description: Availability Zone where the instance is deployed.
     Value: !GetAtt USMInstance.AvailabilityZone
+    Export:
+      Name: "alienvault:ec2:instance:az"
