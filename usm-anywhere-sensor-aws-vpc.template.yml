@@ -290,50 +290,34 @@ Resources:
       GroupDescription: >
         Enable USM Traffic Mirror Connectivity on your USM Sensor Traffic
         Network Interface.
-  SGAllowVXLanTrafficSG:
-    Condition: trafficMirroringEnabled
-    DependsOn: USMTrafficInterfaceSG
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      GroupId: !GetAtt USMTrafficInterfaceSG.GroupId
-      IpProtocol: udp
-      FromPort: '4789'
-      ToPort: '4789'
-      SourceSecurityGroupId: !GetAtt USMEnableTrafficMirroringSG.GroupId
-  SGAllowHTTPHealthCheckSG:
-    Condition: trafficMirroringEnabled
-    DependsOn: USMTrafficInterfaceSG
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      GroupId: !GetAtt USMTrafficInterfaceSG.GroupId
-      IpProtocol: tcp
-      FromPort: '80'
-      ToPort: '80'
-      SourceSecurityGroupId: !GetAtt USMEnableTrafficMirroringSG.GroupId
+      SecurityGroupIngress:
+        - Description: SGAllowVXLanTrafficSG
+          IpProtocol: udp
+          FromPort: '4789'
+          ToPort: '4789'
+          SourceSecurityGroupId: !GetAtt USMEnableTrafficMirroringSG.GroupId
+        - Description: SGAllowHTTPHealthCheckSG
+          IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          SourceSecurityGroupId: !GetAtt USMEnableTrafficMirroringSG.GroupId
   USMConnectionSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
       VpcId: !Ref VpcId
       GroupDescription: >
         Enable SSH and HTTP connectivity on your USM Sensor Instance.
-  SGIngressHTTPUSMConnectionSG:
-    DependsOn: USMConnectionSG
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      GroupId: !GetAtt USMConnectionSG.GroupId
-      IpProtocol: tcp
-      FromPort: '80'
-      ToPort: '80'
-      CidrIp: !Ref HTTPLocation
-  SGIngressSSHUSMConnectionSG:
-    DependsOn: SGIngressHTTPUSMConnectionSG
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      GroupId: GetAtt USMConnectionSG.GroupId
-      IpProtocol: tcp
-      FromPort: '22'
-      ToPort: '22'
-      CidrIp: !Ref SSHLocation
+      SecurityGroupIngress:
+        - Description: SGIngressHTTPUSMConnectionSG
+          IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: !Ref HTTPLocation
+        - Description: SGIngressSSHUSMConnectionSG
+          IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: !Ref SSHLocation
   USMLogServicesSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -341,42 +325,27 @@ Resources:
       GroupDescription: >
         Enable Syslog UDP/TCP/TLS and Graylog connectivity in your USM
         Sensor Instance.
-  SGIngressSyslogUSMLogServicesSG:
-    DependsOn: USMLogServicesSG
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      GroupId: !GetAtt USMLogServicesSG.GroupId
-      IpProtocol: udp
-      FromPort: '514'
-      ToPort: '514'
-      SourceSecurityGroupId: !GetAtt USMEnableLogServicesSG.GroupId
-  SGIngressTCPSyslogUSMLogServicesSG:
-    DependsOn: USMLogServicesSG
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      GroupId: !GetAtt USMLogServicesSG.GroupId
-      IpProtocol: tcp
-      FromPort: '601'
-      ToPort: '602'
-      SourceSecurityGroupId: !GetAtt USMEnableLogServicesSG.GroupId
-  SGIngressTLSSyslogUSMLogServicesSG:
-    DependsOn: USMLogServicesSG
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      GroupId: !GetAtt USMLogServicesSG.GroupId
-      IpProtocol: tcp
-      FromPort: '6514'
-      ToPort: '6515'
-      SourceSecurityGroupId: !GetAtt USMEnableLogServicesSG.GroupId
-  SGIngressGraylogUSMLogServicesSG:
-    DependsOn: USMLogServicesSG
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      GroupId: !GetAtt USMLogServicesSG.GroupId
-      IpProtocol: udp
-      FromPort: '12201'
-      ToPort: '12201'
-      SourceSecurityGroupId: !GetAtt USMEnableLogServicesSG.GroupId
+      SecurityGroupIngress:
+        - Description: SGIngressSyslogUSMLogServicesSG
+          IpProtocol: udp
+          FromPort: '514'
+          ToPort: '514'
+          SourceSecurityGroupId: !GetAtt USMEnableLogServicesSG.GroupId
+        - Description: SGIngressTCPSyslogUSMLogServicesSG
+          IpProtocol: tcp
+          FromPort: '601'
+          ToPort: '602'
+          SourceSecurityGroupId: !GetAtt USMEnableLogServicesSG.GroupId
+        - Description: SGIngressTLSSyslogUSMLogServicesSG
+          IpProtocol: tcp
+          FromPort: '6514'
+          ToPort: '6515'
+          SourceSecurityGroupId: !GetAtt USMEnableLogServicesSG.GroupId
+        - Description: SGIngressGraylogUSMLogServicesSG
+          IpProtocol: udp
+          FromPort: '12201'
+          ToPort: '12201'
+          SourceSecurityGroupId: !GetAtt USMEnableLogServicesSG.GroupId
   DataStorage:
     Type: AWS::EC2::Volume
     DeletionPolicy: Delete
