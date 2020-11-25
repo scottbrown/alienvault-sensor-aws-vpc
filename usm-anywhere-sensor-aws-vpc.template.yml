@@ -92,6 +92,10 @@ Parameters:
     ConstraintDescription: >
       It has to be a valid hostname according to RFC 1123: It can only
       contain numbers, letters, and dashes up to 63 characters.
+  ImageId:
+    Type: AWS::EC2::Image::Id
+    Description: >
+      The AMI ID of the image you want to use.
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -134,39 +138,6 @@ Metadata:
       Environment:
         default: Deployment Environment
 
-Mappings:
-  RegionMap:
-    us-east-1:
-      AMI: ami-039e794335a7854e1
-    us-east-2:
-      AMI: ami-067a3b23108e28f01
-    us-west-1:
-      AMI: ami-0ffe3ed3b11303692
-    us-west-2:
-      AMI: ami-0f679af56dca489fd
-    eu-west-1:
-      AMI: ami-057bd74c1dc47a2df
-    eu-west-2:
-      AMI: ami-0243b809d2d192f43
-    eu-west-3:
-      AMI: ami-0cc3f88105247af3d
-    eu-central-1:
-      AMI: ami-0442da934ca811e5b
-    ap-southeast-1:
-      AMI: ami-034e759fc67a500cf
-    ap-southeast-2:
-      AMI: ami-0b16a0556c9633dfd
-    ap-northeast-1:
-      AMI: ami-0cf8e43d82c694dbf
-    ap-northeast-2:
-      AMI: ami-0b1d16d1db2a5089d
-    ap-south-1:
-      AMI: ami-02bd0e10ad3310e29
-    sa-east-1:
-      AMI: ami-0e5b0a925f2420b96
-    ca-central-1:
-      AMI: ami-0d0f643bcc68c87b4
-
 Resources:
   USMInstance:
     Type: AWS::EC2::Instance
@@ -184,7 +155,7 @@ Resources:
         SubnetId: !Ref SubnetId
       InstanceType: !If [trafficMirroringEnabled, m5.xlarge, m5.large]
       KeyName: !Ref KeyName
-      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
+      ImageId: !Ref ImageId
       IamInstanceProfile: !Ref USMInstanceProfile
       UserData:
         Fn::Base64: !Sub |
