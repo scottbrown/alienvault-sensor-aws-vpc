@@ -276,7 +276,7 @@ Resources:
           SourceSecurityGroupId: !GetAtt USMEnableLogServicesSG.GroupId
   DataStorage:
     Type: AWS::EC2::Volume
-    DeletionPolicy: Delete
+    DeletionPolicy: Retain
     DependsOn: USMInstance
     Properties:
       VolumeType: gp2
