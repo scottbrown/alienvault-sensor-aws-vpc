@@ -9,7 +9,7 @@ This supports the blog series at https://typicalrunt.me.
 * Working knowledge of AWS CloudFormation
 * Working knowledge of AlienVault Sensors
 * A text editor
-* `ruby` and `curl` CLI programs
+* `ruby`, `jq` and `curl` CLI programs
 
 ## Getting Started
 
