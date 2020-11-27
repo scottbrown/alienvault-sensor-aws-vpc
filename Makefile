@@ -18,3 +18,13 @@ download-original: ## Download the original CFN template from AT&T
 convert-to-yaml: ## Convert JSON template to YAML
 	@ruby -e "require 'json'; require 'yaml'; puts YAML.dump(JSON.parse(File.read('$(output.file)')))" > $(yaml.file)
 
+.PHONY: list-amis
+list-amis: ## Lists the AMIs available for use with the sensor
+	@jq '.Mappings.RegionMap | to_entries[] | [.key, .value.AMI]' $(output.file)
+
+.PHONY: ami
+ami: ## Lists the AMI for a given REGION
+ifndef REGION
+	@echo "You need to supply a REGION"; exit 1
+endif
+	@jq '.Mappings.RegionMap | to_entries[] | [.key, .value.AMI] | select(.[0] == "$(REGION)")' $(output.file)
