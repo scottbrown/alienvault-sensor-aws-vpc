@@ -97,47 +97,6 @@ Parameters:
     Description: >
       The AMI ID of the image you want to use.
 
-Metadata:
-  AWS::CloudFormation::Interface:
-    ParameterGroups:
-    - Label:
-        default: AlienVault Node Settings
-      Parameters:
-      - NodeName
-      - KeyName
-      - TrafficMirroring
-    - Label:
-        default: Instance Settings
-      Parameters:
-      - VpcId
-      - SubnetId
-      - PublicIP
-      - HTTPLocation
-      - SSHLocation
-      - Environment
-      - APITermination
-    ParameterLabels:
-      NodeName:
-        default: USM Anywhere Sensor Name
-      APITermination:
-        default: API Termination Protection
-      KeyName:
-        default: Key Name
-      VpcId:
-        default: VPC ID
-      SubnetId:
-        default: Subnet ID
-      PublicIP:
-        default: Deploy Public IP
-      HTTPLocation:
-        default: HTTP Access Range
-      SSHLocation:
-        default: SSH Access Range
-      TrafficMirroring:
-        default: Traffic Mirroring Mode
-      Environment:
-        default: Deployment Environment
-
 Resources:
   USMInstance:
     Type: AWS::EC2::Instance
